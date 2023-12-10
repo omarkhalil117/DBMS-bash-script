@@ -1,12 +1,79 @@
 #! /bin/bash
 
-read -p "Enter filename" fname
+read -p "Enter filename" tname
 
-if [[ -f Testdir/$fname  ]]
+# Validation for file existance
+if [[ -f Testdir/$tname  ]]
 then
-echo "File already exists"
-else
-touch ~/BashProject/TableScripts/Testdir/$fname
-echo file created successfully
+echo File already exists
+./TableMenue.sh
+
 fi
+
+read -p "Enter Number of columns " colnum
+
+for ((i=0 ; i<$colnum ; i++))
+do
+
+# Ask for field name
+read -p "Enter field name" fname
+
+#check if field name is string if not then decrement i
+
+if [[ $fname != +([a-zA-Z]) ]]
+
+then 
+echo field name not valid
+((i=$i-1))
+fi
+
+# Ask if field is primary key
+read -p "Do you want to use this column as primary key ?? [y,n] " ans
+
+if [[ $ans = [yY] && $flag != 1 ]]
+
+then
+pkey=true
+flag=1  # raise flag so we cant specify more than one pk
+
+else
+echo There is existing pkey :D
+pkey=false
+fi
+
+
+# Check for dtype
+echo Enter Data type of field
+
+select dtype in string int
+do
+case $dtype in
+string)
+dtype=string
+break
+;;
+int)
+dtype=int
+break
+;;
+*)
+echo Wrong input
+;;
+esac
+
+schema[$i]=$fname,$dtype,$pkey
+done
+# Create Table file 
+
+
+done
+
+touch "Testdir/$tname"
+touch "Testdir/schema_$tname"
+
+
+echo Table created successfully
+
+
+
 
