@@ -1,0 +1,54 @@
+#! /usr/bin/bash
+
+PS3="Choose the index of the answer (n) : "
+
+options=("Create DB" "List DBs" "Drop DB" "Connect to DB" "Exit")
+
+# enhance this part without CDing , but with /path/
+mkdir DBs
+cd DBs
+
+echo "Select an option:"
+select opt in "${options[@]}" # refers to the count of the array elements
+do
+    case $opt in
+        "Create DB")	# perform validation on dbName i.e.(don't start with integers - no spaces - etc)
+        	    read -p "Enter the Database name : " dbName
+        	    if [ ! -d $dbName ]; then
+        	    	mkdir $dbName
+        	    else
+        	    	echo This database already exists, choose another name
+        	    fi
+            ;;
+            
+        "List DBs")	# check if there's no databases at all!
+	   echo "Available Databases : "
+   	   ls      
+            ;;
+            
+        "Drop DB")	# check if $db exists or not! 
+            read -p "Enter the Database name : " db
+            rm -r $db
+            ;;
+            
+        "Connect to DB")
+        	   read -p "Enter the Database name : " database
+        	   if [ -d $database ]; then
+        	    	cd $database	# should call another script and pass $database as an argument.
+         	echo connected successfully to $database
+        	   else
+        	    	echo This database doesn\'t exist, choose another name
+        	   fi
+            
+            ;;
+            
+        "Exit")
+	   echo "Exiting..."
+	   break
+	   ;;
+        *) 
+            echo "Invalid option, only choose allowable index number"
+            ;;
+    esac
+done
+
