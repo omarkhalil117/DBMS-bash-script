@@ -1,12 +1,63 @@
 #! /usr/bin/bash
 
-: '
-	1- CreateDB [mkdir]
-	2- ListDBs [ls]
-	3- DropDB [rmdir]
-	4- RenameDB [mv]
-	5- Connect DB [cd]
-	6- Exit [exit]
-'
+#TODO: perform validation on dbName i.e.(don't start with integers - no spaces - etc)
+createDB() {
 
+	read -p "Enter the new Database name : " dbName
+	if [ ! -d "./DBs/$dbName" ]; then
+	    mkdir -p "./DBs/$dbName"
+	else
+	    echo This database already exists, choose another name
+	    createDB
+	fi
+}
 
+listDBs() {
+
+	if [ -d "./DBs" ] && [ `ls DBs | wc -l` -ne 0 ]; then		# Check if the Storage main folder exists and not empty
+	   echo "Available Databases : "
+	   ls DBs
+	else
+	   echo "Not Existing or Empty Storage"
+	fi
+
+}
+
+dropDB()
+{
+
+	read -p "Enter the Database name to drop : " db
+	if [ -d "./DBs/$db" ]; then
+		rm -r "./DBs/$db"
+	else
+	   echo "Uknown Database name!"
+	   dropDB
+	fi
+
+}
+
+connectDB() {
+	   
+	   read -p "Enter the Database name to connect to : " database
+        	   if [ -d "./DBs/$database" ]; then
+        	    	cd "./DBs/$database"			# should call another script and pass $database as an argument.
+         	echo connected successfully to "$database" database.
+        	   else
+        	    	echo This database doesn\'t exist, choose another name
+        	    	connectDB
+        	   fi
+}
+
+renameDB() {
+
+	   read -p "Enter the Database name : " database
+        	   if [ -d "./DBs/$database" ]; then
+	   read -p "Enter its new name : " newName
+        	    	mv "./DBs/$database" "./DBs/$newName"
+         	echo Renamed successfully
+        	   else
+        	    	echo This database doesn\'t exist, choose another name
+        	    	renameDB
+        	   fi
+
+}
