@@ -1,0 +1,12 @@
+#! /bin/bash
+
+read -p "Enter filename" fname
+
+if [[ -f Testdir/$fname  ]]
+then
+echo "File already exists"
+else
+touch ~/BashProject/TableScripts/Testdir/$fname
+echo file created successfully
+fi
+

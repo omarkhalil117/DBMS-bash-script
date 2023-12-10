@@ -1,0 +1,20 @@
+#! /bin/bash
+
+# list files
+echo Tables List :
+
+ls Testdir/ 
+
+read -p "Please enter Table you want to delete" tablename 
+
+if [[ -f Testdir/$tablename ]]
+
+then
+`rm Testdir/$tablename`
+echo Table Deleted Successfully
+
+else
+echo Table does not exist !!
+fi
+
+

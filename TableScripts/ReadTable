@@ -1,0 +1,15 @@
+#! /bin/bash
+
+ls Testdir/
+
+read -p "Enter Table you want to read" TableName
+
+if [[ -f Testdir/$TableName ]]
+
+then
+echo `cat Testdir/$TableName`
+
+else
+echo "Wrong Table name"
+
+fi
