@@ -11,6 +11,7 @@ if [[ -f Testdir/$tablename ]]
 
 then
 `rm Testdir/$tablename`
+`rm Testdir/schema_$tablename`
 echo Table Deleted Successfully
 
 else
