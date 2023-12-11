@@ -1,0 +1,4 @@
+#! /usr/bin/bash
+
+#awk 'BEGIN{print "New line of data"}' >> Testdir/emp
+awk '/# | id | name | age/ { found = 1 } END { if (!found) print "# | id | name | age" >> "Testdir/emp" }' Testdir/emp

@@ -3,18 +3,18 @@
 # list files
 echo Tables List :
 
-ls Testdir/ 
+ls Testdir/
 
-read -p "Please enter Table you want to delete" tablename 
+read -p "Please enter Table you want to delete" tablename
 
 if [[ -f Testdir/$tablename ]]
 
 then
-`rm Testdir/$tablename`
-echo Table Deleted Successfully
-
+    `rm Testdir/$tablename`
+    echo Table Deleted Successfully
+    
 else
-echo Table does not exist !!
+    echo Table does not exist !!
 fi
 
 

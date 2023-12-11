@@ -2,7 +2,7 @@
 
 ls Testdir/
 
-read -p "Enter Table you want to read" TableName
+read -p "Enter Table you want to read : " TableName
 
 if [[ -f Testdir/$TableName ]]
 

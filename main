@@ -10,33 +10,33 @@ echo "Select an option:"
 select opt in "${options[@]}"
 do
     case $opt in
-        "Create DB")	
-        	    createDB
-            ;;
-            
+        "Create DB")
+            createDB
+        ;;
+        
         "List DBs")
-   	   			listDBs     
-            ;;
-            
+            listDBs
+        ;;
+        
         "Drop DB")
-        	    dropDB
-            ;;
-         
+            dropDB
+        ;;
+        
         "Rename DB")
-    	    	renameDB
-           ;;
-            
+            renameDB
+        ;;
+        
         "Connect to DB")
-        	   connectDB            
-           ;;
-            
+            connectDB
+        ;;
+        
         "Exit")
-	   		   echo "Exiting..."
-	   		   break
-	   	  ;;
-        *) 
-               echo "Invalid option, only choose allowable index number"
-    	  ;;
+            echo "Exiting..."
+            break
+        ;;
+        *)
+            echo "Invalid option, only choose allowable index number"
+        ;;
     esac
 done
 
