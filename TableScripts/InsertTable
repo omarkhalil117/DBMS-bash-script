@@ -1,4 +1,67 @@
 #! /usr/bin/bash
 
+shopt -s extglob
+
+ParentDB=$1
+echo $ParentDB
+
+read -p "Enter table name you wanna insert into (case-sensitive) : " TableName
+
+# check if table exists or not properly
+: '
+if [ ! -f "DBs/$ParentDB/$TableName" ]; then
+    echo Not Found
+fi
+'
+
+declare -A ImportedSchema
+declare -a TableData=()
+
+schema_file="DBs/$ParentDB/schema_$TableName"
+
+# get data from schema_TableName store in associative array
+eval "$(awk -F':' 'NR>1 { printf "ImportedSchema[%s]=%s\n", $1, $2 }' $schema_file)"
+
+# for loop over keys of associative array and check if values of every iteration == type of data user enters
+
+for key in "${!ImportedSchema[@]}"; do
+    echo "Enter ($key) value : "
+    read cell
+        case $cell in
+        *([0-9]))
+               type="int"
+            ;;
+        *([0-9a-zA-Z]))
+               type="string"
+            ;;
+        *)
+            echo "W e i r d   I n p u t"
+            ;;
+        esac
+
+    #check type equals value or not
+    if [ $type=${ImportedSchema[$key]} ]; then
+        correct=true
+        # save every value on a separate line
+        TableData+=("$cell")
+    else
+        correct=false
+    fi
+    
+done
+
+echo "${TableData[@]}"
+
+if [ $correct != false ]; then
+    for data in "${TableData[@]}"; do
+        echo -n "$data " >> "DBs/$ParentDB/$TableName"
+    done
+    echo >> "DBs/$ParentDB/$TableName"  # append a new line
+fi
+
+unset ImportedSchema
+unset TableData
+
+
 #awk 'BEGIN{print "New line of data"}' >> Testdir/emp
-awk '/# | id | name | age/ { found = 1 } END { if (!found) print "# | id | name | age" >> "Testdir/emp" }' Testdir/emp
+#awk '/# | id | name | age/ { found = 1 } END { if (!found) print "# | id | name | age" >> "Testdir/emp" }' Testdir/emp

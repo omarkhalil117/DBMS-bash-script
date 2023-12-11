@@ -4,7 +4,9 @@ echo Welcome To OpenSource DBMS
 
 MyDB=$1
 
-select choice in CreateTable DeleteTable listTables ReadTable RenameTable InsertUpdate Back Exit
+# what about connecting to another database .. consider conecpt of 'use' in MySQL
+
+select choice in CreateTable DeleteTable listTables ReadTable RenameTable InsertTable UpdateTable Back Exit
 do
     
     case $choice in
@@ -24,14 +26,14 @@ do
         RenameTable)
             source ./RenameTable
         ;;
-        Insert)
-            #source ./Insert
+        InsertTable)
+            source ./TableScripts/InsertTable $MyDB
         ;;
-        Update)
+        UpdateTable)
             #source ./Update
         ;;
         Back)
-            #call main menue script
+            # source ./main #call main menue script
         ;;
         Exit)
             exit

@@ -38,7 +38,7 @@ for ((i = 0; i < $colnum; i++)); do
         pkey=true
         flag=1 # raise flag so we cant specify more than one pk
         echo "$fname is set as a primary key"
-        elif [[ $ans = [nN] && $flag != 0 ]]; then
+    elif [[ $ans = [nN] && $flag != 0 ]]; then
         pkey=false
     fi
     # Check for dtype
