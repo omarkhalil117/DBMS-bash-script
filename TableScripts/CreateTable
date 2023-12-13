@@ -1,19 +1,36 @@
 #! /bin/bash
 
+export LC_COLLATE=C 
+shopt -s extglob
+
+
 read -p "Enter Table name : " tname
 
 AssocDB=$1
 
 # Validation for file existance
-if [[ -f "Testdir/$tname" ]]; then
+if [[ -f "Testdir/$tname" || -z $tname ]]
+    then
     echo Table already exists
-    exit
+    source ./TableMenue.sh
 fi
 
 touch "Testdir/$tname"
 touch "Testdir/schema_$tname"
 
 read -p "Enter Number of columns : " colnum
+
+#check if colnum is integer
+if [[ $colnum =~ [0-9] || -z $colnum ]]
+then 
+echo
+
+else
+echo Wrong datatype or null
+rm "Testdir/$tname"
+rm "Testdir/schema_$tname"
+source ./TableMenue.sh
+fi
 
 declare -A schema=(["Column"]="DataType")  # -A means associative array
 
@@ -26,9 +43,11 @@ for ((i = 0; i < $colnum; i++)); do
     
     #check if field name is string if not then decrement i
     
-    if [[ $fname != +([a-zA-Z]) ]]; then
-        echo field name is not valid
+    if [[ $fname != +([a-zA-Z]) ]]
+     then
+        echo field name is not valid Try again
         ((i = $i - 1))
+        continue
     fi
     
     # Ask if field is primary key
@@ -74,18 +93,5 @@ for key in "${!schema[@]}"; do
     echo "$key:${schema[$key]}" >> "$output_file"
 done
 
-unset schema
 
-: '
-schema
-id      int
-name    string
-age     int
 
-To create table :
-1) DB
-
-To insert into a table :
-1) DB
-2) Columns
-'

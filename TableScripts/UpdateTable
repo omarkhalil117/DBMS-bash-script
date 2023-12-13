@@ -4,7 +4,7 @@ export LC_COLLATE=C
 shopt -s extglob
 
 #print fields to chose
-awk 'BEGIN{FS=":"} NR > 1 {print $1}' Testdir/schema_f1
+awk 'BEGIN{FS=":"} NR > 2 {print $1}' Testdir/schema_f1
 
 #get field name
 read -p "Enter Field name :  " fname
@@ -23,9 +23,16 @@ fi
 read -p "Enter value you want to update : " oldValue
 read -p "Enter updated value : " newValue 
 
+#check for null values
+if [[ -z $fname || -z $oldValue || -z $newValue ]]
+then 
+echo There is a null value try again
+source ./TableMenue.sh
+fi
+
 #get field number
 fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' Testdir/schema_f1`
-fn=$((fn-1))
+fn=$((fn-2))
 
 
 #check if the old value exist
@@ -38,7 +45,7 @@ source ./TableMenue.sh
 fi
 
 #check if the field is primary key
-pknum=`tail -n 1 Testdir/schema_f1`
+pknum=`head -n 1 Testdir/schema_f1`
 
 #check for the datatype and validate input
 datatype=`awk 'BEGIN{FS=":"} {if($1=="'$fname'"){print$2}}' Testdir/schema_f1`

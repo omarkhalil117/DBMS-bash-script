@@ -4,7 +4,7 @@ ls Testdir/
 
 read -p "Enter Table you want to read : " TableName
 
-if ! [[ -f Testdir/$TableName ]]
+if ! [[ -f Testdir/$TableName  || -z $TableName ]]
 then
 echo "Wrong Table name"
 source ./TableMenue.sh
@@ -24,12 +24,69 @@ source ./TableMenue.sh
 ;;
 2)
 
+#list the fields 
+echo choose from these fields :
+awk 'BEGIN{FS=":"} NR>2 {print $1}' Testdir/schema_$TableName
+
 read -p "Enter field you want to search for : " fname
-read -p "Enter field value" val
+read -p "Enter field value : " val
+
+
+#check if the inputs are null
+
+if [[ -z $fname || -z $val ]]
+then
+echo Error NULL input
+source ./TableMenue.sh  
+fi
+
+#check if fname doesn't exist
+flag=`awk 'BEGIN {FS=":" ; f=0} {if($1=="'$fname'"){f=1}} END{print f}' Testdir/schema_$TableName`
+
+if [[ $flag -eq 0 ]]
+then
+echo Wrong field name
+source ./TableMenue.sh
+fi
+
+#check for datatype of value
+
+datatype=`awk 'BEGIN{FS=":"} {if($1=="'$fname'"){print$2}}' Testdir/schema_$TableName`
+
+
+#if datatype is string
+if [[ $datatype = "string" ]]
+then
+    if [[ $val =~ [a-zA-z] ]]
+    then
+    dummy=1   #dummy event
+    else 
+    echo "Wrong data type in old value"
+    source ./TableMenue.sh
+    fi
+    
+fi   
+
+
+#if datatype is int
+if [[ $datatype = "int" ]]
+then
+    if [[ $val =~ [0-9] ]]
+    then 
+    dummy=1   #dummy event
+    else
+    echo "Wrong data type in old value"
+    source ./TableMenue.sh
+    fi
+
+fi
+
+
+
 
 # get field num from schema
 fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' Testdir/schema_f1`
-fn=$((fn-1))
+fn=$((fn-2))
 
 # search for the value int the field number
 awk 'BEGIN{FS=":"} { if($'$fn' == "'$val'") print $0 }' Testdir/f1
@@ -45,7 +102,7 @@ esac
 done
 
 
-echo File not found 
+
 
 
 
