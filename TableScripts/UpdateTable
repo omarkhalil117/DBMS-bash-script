@@ -1,22 +1,69 @@
 #! /bin/bash
 
+#print fields to chose
+awk 'BEGIN{FS=":"} NR > 1 {print $1}' Testdir/schema_f1
 
+#get field name
 read -p "Enter Field name :  " fname
+
+#check existance of field
+flag=`awk 'BEGIN{FS=":" ; f=0} NR>1 {if($1 == "'$fname'") {f=1}} END{print f}' Testdir/schema_f1`
+
+#if it doesn't exist back to main menue
+if [[ $flag = 0 ]]
+then
+echo Wrong field name
+source ./TableMenue.sh
+fi
+
+# Ask for the oldValue and newValue
 read -p "Enter value you want to update : " oldValue
 read -p "Enter updated value : " newValue 
 
 
+#check if the field is primary key
 fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' Testdir/schema_f1`
 fn=$((fn-1))
 
-nr=`awk 'BEGIN{FS=":"} {if ($'$fn' == '$oldValue') print NR }' testTable`
+pknum=`tail -n 1 Testdir/schema_f1`
 
 
-arr=($(awk -F':' 'BEGIN{OFS=":"} { if(NR == "'$nr'") $'$fn' = "'$newValue'" } 1' testTable))
+if [[ $fn -eq $pknum ]]
+then
 
-cat /dev/null > testTable # delete file content
+#check if the newValue already exists
+duplicate=`awk 'BEGIN{FS=":" ; f=0} {if($'$fn'=="'$newValue'") {f=1} } END{print f}' Testdir/f1`
 
+# if there is duplicate value go out :D
+if [[ $duplicate -eq 1 ]]
+then
+echo Sorry the field is primary key and can not be updated with this value
+
+source ./TableMenue.sh
+fi
+
+fi
+
+#get recodrd number
+nr=`awk 'BEGIN{FS=":"} {if ($'$fn' == '$oldValue') print NR }' Testdir/f1`
+
+#store the result
+arr=($(awk -F':' 'BEGIN{OFS=":"} { if(NR == "'$nr'") $'$fn' = "'$newValue'" } 1' Testdir/f1))
+
+# delete file content
+cat /dev/null > Testdir/f1  
+
+#stor the data in the file
 for el in "${arr[@]}"
 do
-echo $el >> testTable 
+echo $el >> Testdir/f1 
 done
+
+# finally !!
+echo Updated Successfully
+
+
+
+# future work ---> check for input data type
+
+

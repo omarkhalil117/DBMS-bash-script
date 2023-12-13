@@ -2,7 +2,7 @@
 
 ls Testdir/
 
-read -p "Enter Table you want to read" TableName
+read -p "Enter Table you want to read : " TableName
 
 if ! [[ -f Testdir/$TableName ]]
 then
@@ -24,13 +24,17 @@ source ./TableMenue.sh
 ;;
 2)
 
-read -p "Enter field you want to search for" fname
+read -p "Enter field you want to search for : " fname
 read -p "Enter field value" val
 
+# get field num from schema
 fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' Testdir/schema_f1`
 fn=$((fn-1))
 
+# search for the value int the field number
 awk 'BEGIN{FS=":"} { if($'$fn' == "'$val'") print $0 }' Testdir/f1
+
+
 source ./TableMenue.sh
 ;;
 *)
@@ -39,6 +43,9 @@ echo Wrong input
 
 esac
 done
+
+
+echo File not found 
 
 
 
