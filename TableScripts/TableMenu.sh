@@ -15,30 +15,31 @@ do
             source ./TableScripts/CreateTable $MyDB
         ;;
         DeleteTable)
-            source ./DeleteTable
+            source ./TableScripts/DeleteTable $MyDB
         ;;
         listTables)
-            source ./listTables
+            source ./TableScripts/listTables $MyDB
         ;;
         ReadTable)
-            source ./ReadTable
+            source ./TableScripts/ReadTable $MyDB
         ;;
         RenameTable)
-            source ./RenameTable
+            source ./TableScripts/RenameTable $MyDB
         ;;
         InsertTable)
             source ./TableScripts/InsertTable $MyDB
         ;;
         UpdateTable)
-            #source ./Update
+            source ./TableScripts/UpdateTable $MyDB
         ;;
         Back)
-            # source ./main #call main menue script
+            #source ./main #call main menue script
         ;;
         Exit)
             exit
         ;;
         *)
+            echo unknown input
         ;;
     esac
     

@@ -1,15 +1,49 @@
 #! /bin/bash
 
-ls Testdir/
+DB=$1
 
 read -p "Enter Table you want to read : " TableName
 
-if [[ -f Testdir/$TableName ]]
-
+if ! [[ -f DBs/$DB/$TableName ]]
 then
-echo `cat Testdir/$TableName`
-
-else
-echo "Wrong Table name"
-
+    echo "Wrong Table name"
+    source ./TableScripts/TableMenue.sh
 fi
+
+echo Do you want to Read The whole table or select some rows ?
+echo [1] Read whole table
+echo [2] Select
+
+select choice in 1 2
+
+do
+    case $choice in
+        1)
+            cat DBs/$DB/$TableName
+            source ./TableScripts/TableMenu.sh
+        ;;
+        2)
+            
+            read -p "Enter field you want to search for : " fname
+            read -p "Enter value of ($fname) : " val
+
+            #awk 'NR==FNR && $1=="name" { fieldNum=NR; next } NR>FNR { if ($fieldNum=="ali") print $0 }' DBs/$DB/schema_$TableName $tableName
+
+            fn=$(awk -v fname="$fname" 'NR==1 { for(i=1; i<=NF; i++) if($i == fname) { fieldNum=i; break } } END { print fieldNum }' DBs/$DB/schema_$TableName)
+            #fn=$((fn-1))
+
+            awk -v fn="$fn" -v val="$val" 'NR==1 || $fn == val' DBs/$DB/$TableName
+
+
+            # fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' DBs/$DB/schema_$TableName`
+            # fn=$((fn-1))
+            
+            # awk 'BEGIN{FS=":"} { if($'$fn' == "'$val'") print $0 }' DBs/$DB/$TableName
+            source ./TableScripts/TableMenu.sh
+        ;;
+        *)
+            echo Wrong input
+        ;;
+        
+    esac
+done

@@ -1,3 +1,4 @@
 Column:DataType
 id:int
-name:string
+salary:int
+name:int

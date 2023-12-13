@@ -1,16 +1,15 @@
-#! /bin/bash
-ls Testdir/
+#! /usr/bin/bash
+
+DB=$1
+ls DBs/$DB | grep -v '^schema_' # List all files not starting with schema_ (table files only)
 
 read -p "Enter the Table you want to rename : " oldname
 
-
-
-if [[ -f Testdir/$oldname ]]
-
-then
-    read -p "Enter new name : " newname
-    mv Testdir/$oldname Testdir/$newname
-    echo Table renamed successfully !!
+if [[ -f DBs/$DB/$oldname ]]; then
+    read -p "Enter new name : " NewName
+    mv DBs/$DB/schema_$oldname DBs/$DB/schema_$NewName
+    mv DBs/$DB/$oldname DBs/$DB/$NewName
+    echo Table renamed successfully with its schema file !!
     
 else
     echo Wrong table name
