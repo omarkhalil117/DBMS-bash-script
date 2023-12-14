@@ -1,0 +1,143 @@
+#! /bin/bash
+
+export LC_COLLATE=C 
+shopt -s extglob
+
+Database=$1
+
+echo Tables List :
+echo =============
+
+ls ./DBs/$Database/
+
+#ask for Table Name
+read -p "Enter Table you want to update : " TableName
+
+if [[ ! -f ./DBs/$Database/$TableName || -z $TableName ]]
+then
+echo Table Not found
+source ./TableScripts/TableMenu.sh
+fi
+
+#print fields to chose
+awk 'BEGIN{FS=":"} NR > 2 {print $1}' ./DBs/$Database/schema_$TableName
+
+#get field name
+read -p "Enter Field name :  " fname
+
+#check existance of field
+flag=`awk 'BEGIN{FS=":" ; f=0} NR>2 {if($1 == "'$fname'") {f=1}} END{print f}' ./DBs/$Database/schema_$TableName`
+
+#if it doesn't exist back to main menue
+if [[ $flag = 0 ]]
+then
+echo Wrong field name
+source ./TableScripts/TableMenu.sh
+fi
+
+# Ask for the oldValue and newValue
+read -p "Enter value you want to update : " oldValue
+read -p "Enter updated value : " newValue 
+
+#check for null values
+if [[ -z $fname || -z $oldValue || -z $newValue ]]
+then 
+echo There is a null value try again
+source ./TableScripts/TableMenu.sh
+fi
+
+#get field number
+fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' ./DBs/$Database/schema_$TableName`
+((fn=$fn-2))
+
+
+#check if the old value exist
+flag=`awk 'BEGIN{FS=":" ; f=0} {if($'$fn' == "'$oldValue'") {f=1}} END{print f}' ./DBs/$Database/$TableName`
+
+if [[ $flag = 0 ]]
+then
+echo The old value does not exist
+source ./TableScripts/TableMenu.sh
+fi
+
+#check if the field is primary key
+pknum=`head -n 1 ./DBs/$Database/schema_$TableName`
+
+#check for the datatype and validate input
+datatype=`awk 'BEGIN{FS=":"} {if($1=="'$fname'"){print$2}}' ./DBs/$Database/schema_$TableName`
+
+
+#if datatype is string
+if [[ $datatype = "string" ]]
+then
+    if ! [[ $oldValue =~ [a-zA-z] ]]
+    then 
+    echo "Wrong data type in old value"
+    source ./TableScripts/TableMenu.sh
+    fi
+    
+    if ! [[ $newValue =~ [a-zA-z] ]]
+    then 
+    echo "Wrong data type in new value"
+    source ./TableScripts/TableMenu.sh
+    fi
+fi   
+
+
+#if datatype is int
+if [[ $datatype = "int" ]]
+then
+    if ! [[ $oldValue =~ [0-9] ]]
+    then 
+    echo "Wrong data type in old value"
+    source ./TableScripts/TableMenu.sh
+    fi
+    
+    if ! [[ $newValue =~ [0-9] ]]
+    then
+    echo "Wrong data type in new value"
+    source ./TableScripts/TableMenu.sh
+    fi
+fi  
+
+#if the field is primary key
+if [[ $fn -eq $pknum ]]
+then
+
+#check if the newValue already exists
+duplicate=`awk 'BEGIN{FS=":" ; f=0} {if($'$fn'=="'$newValue'") {f=1} } END{print f}' ./DBs/$Database/$TableName`
+
+# if there is duplicate value go out :D
+    if [[ $duplicate -eq 1 ]]
+    then
+    echo Sorry the field is primary key and can not be updated with this value
+    source ./TableScripts/TableMenu.sh
+    fi
+
+fi
+
+
+#get recodrd number
+nr=`awk 'BEGIN{FS=":"} {if ($'$fn' == "'$oldValue'") print NR }' ./DBs/$Database/$TableName`
+
+
+#update the field with the old value with the ne value and store the result
+arr=($(awk -F':' 'BEGIN{OFS=":"} { if(NR == "'$nr'") {$'$fn' = "'$newValue'"} } 1' ./DBs/$Database/$TableName))
+
+
+# delete file content
+cat /dev/null > ./DBs/$Database/$TableName  
+
+
+#stor the data in the file
+for el in "${arr[@]}"
+do
+echo $el >> ./DBs/$Database/$TableName 
+done
+
+
+# finally !!
+echo Updated Successfully
+
+
+

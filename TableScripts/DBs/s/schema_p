@@ -1,0 +1,4 @@
+Column:DataType
+id:int
+salary:int
+name:int

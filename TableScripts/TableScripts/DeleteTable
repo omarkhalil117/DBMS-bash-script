@@ -1,0 +1,25 @@
+#! /bin/bash
+
+# list files
+echo Tables List :
+
+ls ./DBs/$1
+
+read -p "Please enter Table you want to delete" tablename
+
+#check nullability
+checkNull $tablename
+
+if [[ -f ./DBs/$1/$tablename ]]
+
+then
+    
+    rm ./DBs/$1/$tablename
+    rm ./DBs/$1/schema_$tablename
+    echo Table Deleted Successfully
+    
+else
+    echo Table does not exist !!
+fi
+
+

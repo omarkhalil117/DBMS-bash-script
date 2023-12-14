@@ -1,0 +1,47 @@
+#! /usr/bin/bash
+
+PS3="Choose the index of the answer (n) : "
+
+echo Welcome to our Humble DBMS in Bash Script :D
+echo =============================================
+
+
+options=("Create DB" "List DBs" "Drop DB" "Rename DB" "Connect to DB" "Exit")
+
+
+source ./functions
+
+echo "Select an option:"
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Create DB")
+            createDB
+        ;;
+        
+        "List DBs")
+            listDBs
+        ;;
+        
+        "Drop DB")
+            dropDB
+        ;;
+        
+        "Rename DB")
+            renameDB
+        ;;
+        
+        "Connect to DB")
+            connectDB
+        ;;
+        
+        "Exit")
+            echo "Exiting..."
+            exit
+        ;;
+        *)
+            echo "Invalid option, only choose allowable index number"
+        ;;
+    esac
+done
+

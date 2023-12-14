@@ -1,0 +1,115 @@
+#! /bin/bash
+
+DB=$1
+
+echo Tables List:
+echo ============
+
+ls ./DBs/$DB/
+
+read -p "Enter Table you want to read : " TableName
+
+if ! [[ -f ./DBs/$DB/$TableName  || -z $TableName ]]
+then
+echo "Wrong Table name"
+source ./TableScripts/TableMenu.sh
+fi
+
+echo Do you want to Read The whole table or select some rows ? 
+echo [1] Read whole table
+echo [2] Select 
+
+select choice in 1 2
+
+do
+case $choice in
+1)
+cat ./DBs/$DB/$TableName
+source ./TableScripts/TableMenu.sh
+;;
+2)
+
+#list the fields 
+echo choose from these fields :
+awk 'BEGIN{FS=":"} NR>2 {print $1}' ./DBs/$DB/schema_$TableName
+
+read -p "Enter field you want to search for : " fname
+read -p "Enter field value : " val
+
+
+#check if the inputs are null
+
+if [[ -z $fname || -z $val ]]
+then
+echo Error NULL input
+source ./TableScripts/TableMenu.sh  
+fi
+
+#check if fname doesn't exist
+flag=`awk 'BEGIN {FS=":" ; f=0} {if($1=="'$fname'"){f=1}} END{print f}' ./DBs/$DB/schema_$TableName`
+
+if [[ $flag -eq 0 ]]
+then
+echo Wrong field name
+source ./TableScripts/TableMenu.sh
+fi
+
+#check for datatype of value
+
+datatype=`awk 'BEGIN{FS=":"} {if($1=="'$fname'"){print$2}}' ./DBs/$DB/schema_$TableName`
+
+
+#if datatype is string
+if [[ $datatype = "string" ]]
+then
+    if [[ $val =~ [a-zA-z] ]]
+    then
+    echo   #dummy event
+    else 
+    echo "Wrong data type in old value"
+    source ./TableScripts/TableMenu.sh
+    fi
+    
+fi   
+
+
+#if datatype is int
+if [[ $datatype = "int" ]]
+then
+    if [[ $val =~ [0-9] ]]
+    then 
+    echo   #dummy event
+    else
+    echo "Wrong data type in old value"
+    source ./TableScripts/TableMenu.sh
+    fi
+
+fi
+
+
+
+
+# get field num from schema
+fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' ./DBs/$DB/schema_$TableName`
+fn=$((fn-2))
+
+# search for the value int the field number
+awk 'BEGIN{FS=":"} { if($'$fn' == "'$val'") print $0 }' ./DBs/$DB/$TableName
+
+
+source ./TableScripts/TableMenu.sh
+;;
+*)
+echo Wrong input
+;;
+
+esac
+done
+
+
+
+
+
+
+
+

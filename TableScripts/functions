@@ -1,0 +1,100 @@
+#! /usr/bin/bash
+
+export LC_COLLATE=C 
+shopt -s extglob
+
+checkNull() {
+    if [[ -z $1 ]]
+    then
+    echo "You entered nothing as an input please try again :)"
+    source ./main
+    fi
+}
+
+
+#TODO: perform validation on dbName i.e.(don't start with integers - no spaces - etc)
+createDB() {
+    
+    read -p "Enter the new Database name : " dbName
+    
+    #check for null dbName
+    checkNull $dbName
+    
+    if [ ! -d "./DBs/$dbName" ]; then
+        mkdir -p "./DBs/$dbName"
+    else
+        echo This database already exists, choose another name
+        createDB
+    fi
+}
+
+#TODO: Handle if the user already connected to a specific DB and wants to see all
+listDBs() {
+    # Check if the Storage main folder exists and not empty
+    if [ -d "./DBs" ] && [ `ls DBs | wc -l` -ne 0 ]; then 
+        echo "Available Databases : "
+        ls DBs
+    else
+        echo "Not Existing or Empty Storage"
+    fi
+    
+}
+
+dropDB()
+{
+    
+    read -p "Enter the Database name to drop : " db
+    
+    #check nullability
+    checkNull $db
+    
+    if [ -d "./DBs/$db" ]; then
+        rm -r "./DBs/$db"
+    else
+        echo "Uknown Database name!"
+        dropDB
+    fi
+    
+}
+
+connectDB() {
+     
+    echo Databases List :
+    echo ================
+    ls ./DBs/
+    
+    read -p "Enter the Database name to connect to : " database
+    
+    #Check nullability
+    checkNull $database
+    
+    if [ -d "./DBs/$database" ]; then
+        source ./TableScripts/TableMenu.sh $database
+        echo connected successfully to "$database" database.
+    else
+        echo This database doesn\'t exist, choose another name
+        connectDB
+    fi
+}
+
+renameDB() {
+    
+    read -p "Enter the Database name : " database
+    
+    #Check nullability database
+    checkNull $database
+    
+    if [ -d "./DBs/$database" ]; then
+        read -p "Enter its new name : " newName
+        
+        #Check nullability for new name
+        checkNull $newName
+        
+        mv "./DBs/$database" "./DBs/$newName"
+        echo Renamed successfully
+    else
+        echo This database doesn\'t exist, choose another name
+        renameDB
+    fi
+    
+}

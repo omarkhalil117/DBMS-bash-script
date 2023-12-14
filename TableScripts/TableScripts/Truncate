@@ -1,0 +1,15 @@
+#! /bin/bash
+
+ls Testdir/
+
+read -p "Enter Table you want to Truncate : " TableName
+
+if ! [[ -f Testdir/$TableName  || -z $TableName ]]
+then
+echo "Wrong Table name"
+source ./TableMenue.sh
+fi
+
+cat /dev/null > Testdir/$TableName
+
+echo Table truncated successfully
