@@ -1,7 +1,0 @@
-#! /bin/bash
-
-#ls /$dbname
-ls Testdir/
-
-
- 
