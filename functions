@@ -42,7 +42,9 @@ listDBs() {
 
 dropDB()
 {
-    
+    echo Databases List :
+    echo ================
+    ls ./DBs/    
     read -p "Enter the Database name to drop : " db
     
     #check nullability
@@ -50,9 +52,10 @@ dropDB()
     
     if [ -d "./DBs/$db" ]; then
         rm -r "./DBs/$db"
+        echo Database dropped successfully
     else
         echo "Uknown Database name!"
-        dropDB
+        source ./main
     fi
     
 }
@@ -78,7 +81,11 @@ connectDB() {
 }
 
 renameDB() {
-    
+
+    echo Databases List :
+    echo ================
+    ls ./DBs/
+       
     read -p "Enter the Database name : " database
     
     #Check nullability database
@@ -94,7 +101,7 @@ renameDB() {
         echo Renamed successfully
     else
         echo This database doesn\'t exist, choose another name
-        renameDB
+        source ./main
     fi
     
 }

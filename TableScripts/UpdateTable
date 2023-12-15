@@ -8,18 +8,18 @@ Database=$1
 echo Tables List :
 echo =============
 
-ls ./DBs/$Database/
+ls ./DBs/$Database/ | grep -v 'schema_'
 
 #ask for Table Name
 read -p "Enter Table you want to update : " TableName
 
-if [[ ! -f ./DBs/$Database/$TableName || -z $TableName ]]
+if [[ ! -f ./DBs/$Database/$TableName ]]
 then
 echo Table Not found
 source ./TableScripts/TableMenu.sh
 fi
 
-#print fields to chose
+#print fields to choose
 awk 'BEGIN{FS=":"} NR > 2 {print $1}' ./DBs/$Database/schema_$TableName
 
 #get field name
@@ -50,7 +50,6 @@ fi
 fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' ./DBs/$Database/schema_$TableName`
 ((fn=$fn-2))
 
-echo "fn $fn"
 
 #check if the old value exist
 flag=`awk 'BEGIN{FS=":" ; f=0} {if($'$fn' == "'$oldValue'") {f=1}} END{print f}' ./DBs/$Database/$TableName`

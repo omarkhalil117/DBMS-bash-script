@@ -1,6 +1,6 @@
 #! /bin/bash
 
-ls ./DBs/$1/
+ls ./DBs/$1/ | grep -v '^schema_'
 
 
  

@@ -9,10 +9,10 @@ read -p "Enter Table name : " tname
 DB=$1
 
 # Validation for file existance
-if [[ -f "./DBs/$DB/$tname" || -z $tname ]]
+if [[ -f "./DBs/$DB/$tname" || -z $tname || $tname =~ ^[0-9] ]]
     then
-    echo Table already exists
-    source ./TableMenu.sh
+    echo Table already exists or empty value or starts with number
+    source ./TableScripts/TableMenu.sh
 fi
 
 touch "./DBs/$DB/$tname"
@@ -21,15 +21,12 @@ touch "./DBs/$DB/schema_$tname"
 read -p "Enter Number of columns : " colnum
 
 #check if colnum is integer or NULL
-if [[ $colnum =~ [0-9] || -z $colnum ]]
+if ! [[ $colnum =~ ^[0-9]+$ ]]
 then 
-echo    #dummy event
-
-else
 echo Wrong datatype or null
 rm "./DBs/$DB/$tname"
 rm "./DBs/$DB/schema_$tname"
-source ./TableMenu.sh
+source ./TableScripts/TableMenu.sh
 fi
 
 declare -A schema=(["Column"]="DataType")  # -A means associative array
@@ -46,7 +43,7 @@ for ((i = 0; i < $colnum; i++)); do
     if [[ $fname != +([a-zA-Z]) ]]
      then
         echo field name is not valid Try again
-        ((i = $i - 1))
+        ((i=$i-1))
         continue
     fi
     

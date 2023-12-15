@@ -9,9 +9,10 @@ if [[ -f DBs/$DB/$oldname ]]; then
     read -p "Enter new name : " NewName
     mv DBs/$DB/schema_$oldname DBs/$DB/schema_$NewName
     mv DBs/$DB/$oldname DBs/$DB/$NewName
-    echo Table renamed successfully with its schema file !!
+    echo Table renamed successfully with !!
     
 else
     echo Wrong table name
+    source ./TableScripts/TableMenu.sh
     
 fi

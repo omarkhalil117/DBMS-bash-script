@@ -9,7 +9,7 @@ ParentDB=$1
 echo Data Base Tables :
 
 #list Database Tables
-ls ./DBs/$ParentDB/
+ls ./DBs/$ParentDB/ | grep -v '^schema_'
 
 #ask for the Table name
 read -p "Enter table name you wanna insert into (case-sensitive) : " TableName
@@ -25,8 +25,8 @@ fi
 declare -A ImportedSchema
 declare -a TableData=()
 
-schema_file="DBs/$ParentDB/schema_$TableName"
-table_file="DBs/$ParentDB/$TableName"
+schema_file="./DBs/$ParentDB/schema_$TableName"
+table_file="./DBs/$ParentDB/$TableName"
 
 # get data from schema_TableName store in associative array
 eval "$(awk -F':' 'NR>2 { printf "ImportedSchema[%s]=%s\n", $1, $2 }' $schema_file)"
@@ -41,21 +41,22 @@ for key in "${!ImportedSchema[@]}"; do
     echo "Enter ($key) value : "
     read cell
         case $cell in
-        *([0-9]))
+        +(^[0-9]+$))     # so he cant enter 5a,6a
                type="int"
             ;;
-        *([0-9a-zA-Z]))
+        +([0-9a-zA-Z]))
                type="string"
             ;;
         *)
             echo "W e i r d   I n p u t"
+            source ./TableScripts/TableMenu.sh
             ;;
         esac
     
     # if the field is primary key     
     if [[ $count -eq $pk ]]
     then
-    #check if primary key alreafy exist
+    #check if primary key already exist
     flag=`awk 'BEGIN{FS=":";f=0} {if($'$pk' == "'$cell'") {f=1}} END{print f}' $table_file`
     
         if [[ $flag -eq 1 ]]
@@ -67,7 +68,7 @@ for key in "${!ImportedSchema[@]}"; do
     
     #check type equals value or not
     if [ $type=${ImportedSchema[$key]} ]; then
-        correct=true
+        correct=1
         # save every value on a separate line
         if [[ $count == 1 ]]
         then
@@ -76,26 +77,29 @@ for key in "${!ImportedSchema[@]}"; do
         TableData=$TableData:$cell
         fi
     else
-        correct=false
+        correct=0
     fi
     
-
+    
     
     ((count=$count+1))
 done
 
 echo "${TableData[@]}"
 
-if [ $correct != false ]; then
+if [[ $correct -eq 0 ]]; then
     for data in "${TableData[@]}"; do
-        echo -n "$data " >> "DBs/$ParentDB/$TableName"
+        echo -n "$data " >> "./DBs/$ParentDB/$TableName"
     done
-    echo >> "DBs/$ParentDB/$TableName"  # append a new line
+    echo >> "./DBs/$ParentDB/$TableName"  # append a new line
+    
+    else
+    echo Wrong inputs
+    source ./TableScripts/TableMenu.sh
 fi
 
 unset ImportedSchema
 unset TableData
 
 
-#awk 'BEGIN{print "New line of data"}' >> Testdir/emp
-#awk '/# | id | name | age/ { found = 1 } END { if (!found) print "# | id | name | age" >> "Testdir/emp" }' Testdir/emp
+
