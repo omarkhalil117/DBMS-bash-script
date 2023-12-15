@@ -4,6 +4,8 @@ DBase=$1
 
 ls ./DBs/$DBase | grep -v '^schema_'
 
+shopt -s extglob
+
 read -p "Enter Table you want to read : " TableName
 
 tb="DBs/$DBase/$TableName"
@@ -13,7 +15,7 @@ sc="DBs/$DBase/schema_$TableName"
 if ! [[ -f $tb || -z $tb ]]
 then
     echo "Wrong Table name"
-    #source ./TableMenue.sh
+    source ./TableScripts/TableMenu.sh
 fi
 
 echo Do you want to Read The whole table or select some rows ?
@@ -26,7 +28,7 @@ do
     case $choice in
         1)
             cat $tb
-            #source ./TableMenue.sh
+            source ./TableScripts/TableMenu.sh
         ;;
         2)
             
@@ -43,7 +45,7 @@ do
             if [[ -z $fname || -z $val ]]
             then
                 echo Error NULL input
-                #source ./TableMenue.sh
+                source ./TableScripts/TableMenu.sh
             fi
             
             #check if fname doesn't exist
@@ -52,40 +54,36 @@ do
             if [[ $flag -eq 0 ]]
             then
                 echo Wrong field name
-                #source ./TableMenue.sh
+                source ./TableScripts/TableMenu.sh
             fi
             
             #check for datatype of value
-            
             datatype=`awk 'BEGIN{FS=":"} {if($1=="'$fname'"){print$2}}' $sc`
             
             
             #if datatype is string
             if [[ $datatype = "string" ]]
             then
-                if [[ $val =~ [a-zA-z] ]]
-                then
+            # check if it contains a string or not
+                if [[ -n $val ]]; then
                     dummy=1   #dummy event
                 else
                     echo "Wrong data type in old value"
-                    #source ./TableMenue.sh
+                    source ./TableScripts/TableMenu.sh
                 fi
                 
             fi
             
-            echo "Field name: $fname"
-            echo "File path: $sc"
-            fn=$(awk 'BEGIN{FS=":"} NR > 2 {if ($1 == "'$fname'") print NR }' "$sc")
-
             # get field num from schema
-            #fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' $sc`
-            echo "$fn"
-            fn=$((fn-2))
-            echo "$fn"
-            # search for the value int the field number
-            awk 'BEGIN{FS=" "} { if($'$fn' == "'$val'") print $0 }' $tb
+            fn=$(awk 'BEGIN{FS=":"} NR > 2 {if ($1 == "'$fname'") print NR }' "$sc")
             
-            #source ./TableMenue.sh
+            # increment it as pk is in the first line
+            fn=$((fn-2))
+            
+            # search for the value int the field number
+            awk 'BEGIN{FS="|"} { if($'$fn' == "'$val'") print $0 }' $tb
+            
+            source ./TableScripts/TableMenu.sh
         ;;
         *)
             echo Wrong input
