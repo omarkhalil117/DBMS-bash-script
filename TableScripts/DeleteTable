@@ -11,13 +11,22 @@ read -p "Please enter Table you want to delete/delete-from : " t_name
 t="DBs/$ourDataBase/$t_name"
 s="DBs/$ourDataBase/schema_$t_name"
 
-deleteOptions=("Delete_Whole_Table" "Delete_From_Table")
+if ! [[ -f $t  || -z $t ]]
+then
+    echo "Wrong Table name"
+    source ./TableScripts/TableMenu.sh
+fi
+
+
+
+
+deleteOptions=("Delete_Whole_Table" "Delete_From_Table" "Truncate_The_Table")
 
 select choice in "${deleteOptions[@]}"
 
 do
     case $choice in
-            "Delete_Whole_Table")
+        "Delete_Whole_Table")
 
             if [[ -f DBs/$ourDataBase/$tablename ]]; then
                 `rm DBs/$ourDataBase/$tablename`
@@ -44,11 +53,15 @@ do
             fi
 
             read -p "Please enter the field  value : " f_value
-            
+            # select lines that do not match the pattern & store in another tmp file to be overrided in the same file.
             awk -v pattern="$f_value" '$0 !~ pattern' "$t" > temp && mv temp "$t"
         ;;
+        "Truncate_The_Table")
+            cat /dev/null > $t
+            echo Table truncated successfully        
+        ;;
         *)
-            echo default case
+            echo Wrong Input
         ;;
         
     esac
