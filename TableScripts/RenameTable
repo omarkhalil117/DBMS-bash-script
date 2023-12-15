@@ -1,6 +1,8 @@
 #! /usr/bin/bash
 
 DB=$1
+
+echo See all available tables files:
 ls DBs/$DB | grep -v '^schema_' # List all files not starting with schema_ (table files only)
 
 read -p "Enter the Table you want to rename : " oldname
@@ -12,6 +14,8 @@ if [[ -f DBs/$DB/$oldname ]]; then
     echo Table renamed successfully with its schema file !!
     
 else
-    echo Wrong table name
-    
+    echo Wrong table name  
 fi
+
+
+source ./TableScripts/TableMenu.sh

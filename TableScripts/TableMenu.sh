@@ -1,12 +1,11 @@
 #! /bin/bash
-
-echo Welcome To OpenSource DBMS
+shopt -s extglob
 
 MyDB=$1
 
 # what about connecting to another database .. consider conecpt of 'use' in MySQL
 
-select choice in CreateTable DeleteTable listTables ReadTable RenameTable InsertTable UpdateTable Back Exit
+select choice in CreateTable DeleteTable listTables ReadTable RenameTable InsertTable UpdateTable Back Exit 0
 do
     
     case $choice in
@@ -33,10 +32,17 @@ do
             source ./TableScripts/UpdateTable $MyDB
         ;;
         Back)
-            #source ./main #call main menue script
+            source ./main
         ;;
         Exit)
             exit
+        ;;
+        0)
+            if [[ -z $1 ]];then     # means = null
+                source ./main
+            else
+                source ./TableScripts/TableMenu.sh
+            fi 
         ;;
         *)
             echo unknown input

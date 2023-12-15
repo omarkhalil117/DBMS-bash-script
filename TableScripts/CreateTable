@@ -4,10 +4,9 @@ read -p "Enter Table name : " tname
 
 AssocDB=$1
 
-# Validation for file existance
 if [[ -f DBs/$AssocDB/$tname ]]; then
     echo Table already exists
-    exit
+    source ./TableScripts/CreateTable $AssocDB
 fi
 
 touch "DBs/$AssocDB/$tname"
@@ -15,59 +14,37 @@ touch "DBs/$AssocDB/schema_$tname"
 
 read -p "Enter Number of columns : " colnum
 
+if [ $colnum -eq 0 ]; then
+    echo invalid number of columns
+    source ./TableScripts/CreateTable $AssocDB
+fi
+
 declare -A schema=(["Column"]="DataType")  # -A means associative array
 
-# validate number of columns is number(integer) = $colnum
+flag=false
+
+source ./TableScripts/HelperFunctions
 
 for ((i = 0; i < $colnum; i++)); do
     
-    # Ask for field name
-    read -p "Enter column name : " fname
-    
-    #check if field name is string if not then decrement i
-    
-    if [[ $fname != +([a-zA-Z]) ]]; then
-        echo field name is not valid
-        ((i = $i - 1))
-    fi
-    
-    # Ask if field is primary key
+    # Check for field name
+    read -p "Enter $((i+1))-th column name (Any table MUST have a pk) : " fname
+    checkName $fname
+
+    # Check for primary key
     read -p "Do you want to use this column as a primary key ?? [y|Y OR n|N] " ans
-    
-    if [[ $ans = [yY] && $flag != 1 ]]; then
-        pkey=true
-        flag=1 # raise flag so we cant specify more than one pk
-        echo "$fname is set as a primary key"
-    elif [[ $ans = [nN] && $flag != 0 ]]; then
-        pkey=false
-    fi
+    checkPrimaryKey
+
     # Check for dtype
     echo Enter Data type of column :
-    
-    select dtype in string int; do
-        case $dtype in
-            string)
-                dtype=string
-                schema+=([$fname]=$dtype) > "DBs/$AssocDB/schema_$tname"
-                break
-            ;;
-            int)
-                dtype=int
-                schema+=([$fname]=$dtype) > "DBs/$AssocDB/schema_$tname"
-                break
-            ;;
-            *)
-                echo Wrong input
-            ;;
-        esac        
-
-    done
+    checkDataType
     
 done
 
 echo Table created successfully
 
 output_file="DBs/$AssocDB/schema_$tname"
+echo "$PrimaryKey" >> $output_file
 
 for key in "${!schema[@]}"; do
     echo "$key:${schema[$key]}" >> "$output_file"
@@ -75,16 +52,5 @@ done
 
 unset schema
 
-: '
-schema
-id      int
-name    string
-age     int
 
-To create table :
-1) DB
 
-To insert into a table :
-1) DB
-2) Columns
-'

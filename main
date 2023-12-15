@@ -1,8 +1,10 @@
 #! /usr/bin/bash
 
-PS3="Choose the index of the answer (n) : "
+echo Welcome To Bash-Base DBMS Project 🗃️
 
-options=("Create DB" "List DBs" "Drop DB" "Rename DB" "Connect to DB" "Exit")
+PS3="Choose a number (n) 0/10 => Menu : "
+
+options=("Create DB" "List DBs" "Drop DB" "Rename DB" "Connect to DB" "Exit" "0")
 
 source ./functions
 
@@ -30,8 +32,16 @@ do
             connectDB
         ;;
         
+        "0")
+            if [[ -z $1 ]];then     # means = null
+                source ./main
+            else
+                source ./TableScripts/TableMenu.sh
+            fi 
+        ;;
+
         "Exit")
-            echo "Exiting..."
+            echo "Exiting...🚪"
             break
         ;;
         *)

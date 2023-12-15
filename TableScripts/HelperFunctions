@@ -1,0 +1,87 @@
+#! /usr/bin/bash
+
+checkPrimaryKey() {
+    if [[ $ans = [yY] && $flag == false ]]; then
+        flag=true
+        echo "$fname is set as a primary key"
+        PrimaryKey=$((i+1))
+        
+        elif [[ $ans = [yY] && $flag == true ]]; then
+        echo "error no more than 1 pk is allowed"
+        source ./TableScripts/CreateTable $AssocDB
+        elif [[ $ans = [nN] ]]; then
+        echo
+    else
+        echo bad input
+        source ./TableScripts/CreateTable $AssocDB
+    fi
+    
+    if [[ $i -eq $(($colnum-1)) && $flag == false ]]; then
+        echo Fatal Error you didn\'t set the pk yet!
+        echo exiting
+        source ./TableScripts/CreateTable $AssocDB
+    fi
+}
+
+checkDataType() {
+    select dtype in int string; do
+        case $dtype in
+            int)
+                dtype=int
+                schema+=([$fname]=$dtype) > "DBs/$AssocDB/schema_$tname"
+                break
+            ;;
+            string)
+                dtype=string
+                schema+=([$fname]=$dtype) > "DBs/$AssocDB/schema_$tname"
+                break
+            ;;
+            *)
+                echo Wrong input
+                source ./TableScripts/CreateTable $AssocDB
+            ;;
+        esac
+    done
+}
+
+checkStringDataType() {
+    if [[ $datatype = "string" ]]
+    then
+        if [[ $oldValue =~ [a-zA-z] ]]
+        then
+            dummy=1   #dummy event
+        else
+            echo "Wrong data type in old value"
+            source ./TableScripts/TableMenu.sh
+        fi
+        
+        if [[ $newValue =~ [a-zA-z] ]]
+        then
+            dummy=1   #dummy event
+        else
+            echo "Wrong data type in new value"
+            source ./TableScripts/TableMenu.sh
+        fi
+    fi
+}
+
+checkIntegerDataType() {
+    if [[ $datatype = "int" ]]
+    then
+        if [[ $oldValue =~ [0-9] ]]
+        then
+            dummy=1   #dummy event
+        else
+            echo "Wrong data type in old value"
+            source ./TableScripts/TableMenu.sh
+        fi
+        
+        if [[ $newValue =~ [0-9] ]]
+        then
+            dummy=1   #dummy event
+        else
+            echo "Wrong data type in new value"
+            source ./TableScripts/TableMenu.sh
+        fi
+    fi
+}

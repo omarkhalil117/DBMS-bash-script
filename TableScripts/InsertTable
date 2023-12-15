@@ -3,16 +3,14 @@
 shopt -s extglob
 
 ParentDB=$1
-echo $ParentDB
 
 read -p "Enter table name you wanna insert into (case-sensitive) : " TableName
 
-# check if table exists or not properly
-: '
 if [ ! -f "DBs/$ParentDB/$TableName" ]; then
-    echo Not Found
+    echo unknown table
+    exit
 fi
-'
+
 
 declare -A ImportedSchema
 declare -a TableData=()
@@ -20,24 +18,62 @@ declare -a TableData=()
 schema_file="DBs/$ParentDB/schema_$TableName"
 
 # get data from schema_TableName store in associative array
-eval "$(awk -F':' 'NR>1 { printf "ImportedSchema[%s]=%s\n", $1, $2 }' $schema_file)"
+eval "$(awk -F':' 'NR>2 { printf "ImportedSchema[%s]=%s\n", $1, $2 }' $schema_file)"
 
-# for loop over keys of associative array and check if values of every iteration == type of data user enters
+# get the name of primary key column
+primaryK=$(awk -F ':' 'NR==1 {print $1}' $schema_file)
+
+# get the field number of primary key
+pk_index=$(awk -F ':' 'NR>=3 { if ($1 == "'$primaryK'") print NR }' $schema_file)
+((pk_index=pk_index-2))
 
 for key in "${!ImportedSchema[@]}"; do
-    echo "Enter ($key) value : "
-    read cell
+
+    # check for primary key type and duplication.
+    if [[ $key == $primaryK ]]; then
+        echo "Enter ($key) value [PK] : "
+        read cell
         case $cell in
-        *([0-9]))
-               type="int"
+        +([0-9]))   # if  pk is integer
+
+                sum_Of_Occurrences=$(awk -v field="$pk_index" -F '|' '{if($pk_index + 0 == "'$cell'") count++} END{print (count == "" ? 0 : count)}' "DBs/$ParentDB/$TableName")
+                
+                if [ $sum_Of_Occurrences -ge 1 ]; then
+                    echo error no duplicates of pk allowed
+                    exit
+                else    
+                    echo
+                fi
             ;;
-        *([0-9a-zA-Z]))
-               type="string"
+        +([a-zA-Z]))  # if pk is string
+        
+                sum_Of_Occurrences=$(awk -v field="$pk_index" -v field="$cell" -F '|' '{if($pk_index == $cell) count++} END{print (count == "" ? 0 : count)}' "DBs/$ParentDB/$TableName")
+                
+                if [ $sum_Of_Occurrences -ge 1 ]; then
+                    echo error no duplicates of pk allowed
+                    exit
+                else   
+                    echo
+                fi
             ;;
-        *)
-            echo "W e i r d   I n p u t"
-            ;;
-        esac
+        esac 
+    else
+        echo "Enter ($key) value : "
+        read cell
+    fi
+    
+    case $cell in
+    +([0-9]))
+            type="int"
+        ;;
+    +([0-9a-zA-Z]))
+            type="string"
+            
+        ;;
+    *)
+        echo "W e i r d   I n p u t"
+        ;;
+    esac
 
     #check type equals value or not
     if [ $type=${ImportedSchema[$key]} ]; then
@@ -54,14 +90,10 @@ echo "${TableData[@]}"
 
 if [ $correct != false ]; then
     for data in "${TableData[@]}"; do
-        echo -n "$data " >> "DBs/$ParentDB/$TableName"
+        echo -n "$data|" >> "DBs/$ParentDB/$TableName"
     done
     echo >> "DBs/$ParentDB/$TableName"  # append a new line
 fi
 
 unset ImportedSchema
 unset TableData
-
-
-#awk 'BEGIN{print "New line of data"}' >> Testdir/emp
-#awk '/# | id | name | age/ { found = 1 } END { if (!found) print "# | id | name | age" >> "Testdir/emp" }' Testdir/emp

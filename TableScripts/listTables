@@ -1,7 +1,6 @@
 #! /bin/bash
 
-#ls /$dbname
-ls Testdir/
+DataBase=$1
 
-
+ls ./DBs/$DataBase | grep -v '^schema_' 
  

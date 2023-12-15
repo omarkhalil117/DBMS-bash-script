@@ -1,13 +1,19 @@
 #! /bin/bash
 
-DB=$1
+DBase=$1
+
+ls ./DBs/$DBase | grep -v '^schema_'
 
 read -p "Enter Table you want to read : " TableName
 
-if ! [[ -f DBs/$DB/$TableName ]]
+tb="DBs/$DBase/$TableName"
+sc="DBs/$DBase/schema_$TableName"
+
+
+if ! [[ -f $tb || -z $tb ]]
 then
     echo "Wrong Table name"
-    source ./TableScripts/TableMenue.sh
+    #source ./TableMenue.sh
 fi
 
 echo Do you want to Read The whole table or select some rows ?
@@ -19,27 +25,67 @@ select choice in 1 2
 do
     case $choice in
         1)
-            cat DBs/$DB/$TableName
-            source ./TableScripts/TableMenu.sh
+            cat $tb
+            #source ./TableMenue.sh
         ;;
         2)
             
-            read -p "Enter field you want to search for : " fname
-            read -p "Enter value of ($fname) : " val
-
-            #awk 'NR==FNR && $1=="name" { fieldNum=NR; next } NR>FNR { if ($fieldNum=="ali") print $0 }' DBs/$DB/schema_$TableName $tableName
-
-            fn=$(awk -v fname="$fname" 'NR==1 { for(i=1; i<=NF; i++) if($i == fname) { fieldNum=i; break } } END { print fieldNum }' DBs/$DB/schema_$TableName)
-            #fn=$((fn-1))
-
-            awk -v fn="$fn" -v val="$val" 'NR==1 || $fn == val' DBs/$DB/$TableName
-
-
-            # fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' DBs/$DB/schema_$TableName`
-            # fn=$((fn-1))
+            #list the fields
+            echo choose from these fields :
+            awk 'BEGIN{FS=":"} NR>2 {print $1}' $sc
             
-            # awk 'BEGIN{FS=":"} { if($'$fn' == "'$val'") print $0 }' DBs/$DB/$TableName
-            source ./TableScripts/TableMenu.sh
+            read -p "Enter field you want to search for : " fname
+            read -p "Enter field value : " val
+            
+            
+            #check if the inputs are null
+            
+            if [[ -z $fname || -z $val ]]
+            then
+                echo Error NULL input
+                #source ./TableMenue.sh
+            fi
+            
+            #check if fname doesn't exist
+            flag=`awk 'BEGIN {FS=":" ; f=0} {if($1=="'$fname'"){f=1}} END{print f}' $sc`
+            
+            if [[ $flag -eq 0 ]]
+            then
+                echo Wrong field name
+                #source ./TableMenue.sh
+            fi
+            
+            #check for datatype of value
+            
+            datatype=`awk 'BEGIN{FS=":"} {if($1=="'$fname'"){print$2}}' $sc`
+            
+            
+            #if datatype is string
+            if [[ $datatype = "string" ]]
+            then
+                if [[ $val =~ [a-zA-z] ]]
+                then
+                    dummy=1   #dummy event
+                else
+                    echo "Wrong data type in old value"
+                    #source ./TableMenue.sh
+                fi
+                
+            fi
+            
+            echo "Field name: $fname"
+            echo "File path: $sc"
+            fn=$(awk 'BEGIN{FS=":"} NR > 2 {if ($1 == "'$fname'") print NR }' "$sc")
+
+            # get field num from schema
+            #fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' $sc`
+            echo "$fn"
+            fn=$((fn-2))
+            echo "$fn"
+            # search for the value int the field number
+            awk 'BEGIN{FS=" "} { if($'$fn' == "'$val'") print $0 }' $tb
+            
+            #source ./TableMenue.sh
         ;;
         *)
             echo Wrong input

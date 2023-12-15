@@ -1,11 +1,21 @@
 #! /usr/bin/bash
 
+checkName() {
+
+    if [[ $1 != +([a-zA-Z]) ]]; then
+        echo This name is not valid.
+        checkName
+    fi
+
+}
+
 #TODO: perform validation on dbName i.e.(don't start with integers - no spaces - etc)
 createDB() {
-    
+
     read -p "Enter the new Database name : " dbName
     if [ ! -d "./DBs/$dbName" ]; then
         mkdir -p "./DBs/$dbName"
+        echo "A Brand new database is just made for you :)"
     else
         echo This database already exists, choose another name
         createDB
@@ -20,6 +30,7 @@ listDBs() {
         ls DBs
     else
         echo "Not Existing or Empty Storage"
+        listDBs
     fi
     
 }

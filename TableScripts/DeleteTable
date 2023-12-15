@@ -1,20 +1,18 @@
 #! /bin/bash
 
-# list files
+ourDataBase=$1
+
 echo Tables List :
 
-ls Testdir/
+ls ./DBs/$ourDataBase | grep -v '^schema_'
 
-read -p "Please enter Table you want to delete" tablename
+read -p "Please enter Table you want to delete : " tablename
 
-if [[ -f Testdir/$tablename ]]
-
-then
-    `rm Testdir/$tablename`
+if [[ -f DBs/$ourDataBase/$tablename ]]; then
+    `rm DBs/$ourDataBase/$tablename`
+    `rm DBs/$ourDataBase/schema_$tablename`
     echo Table Deleted Successfully
-    
 else
-    echo Table does not exist !!
+    echo This table does not exist !!
 fi
-
 
