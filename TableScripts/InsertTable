@@ -26,12 +26,17 @@ declare -A ImportedSchema
 declare -a TableData=()
 
 schema_file="DBs/$ParentDB/schema_$TableName"
+table_file="DBs/$ParentDB/$TableName"
 
 # get data from schema_TableName store in associative array
 eval "$(awk -F':' 'NR>2 { printf "ImportedSchema[%s]=%s\n", $1, $2 }' $schema_file)"
 
+#get primary key index
+pk=`head -n 1 $schema_file`
+
+
 # for loop over keys of associative array and check if values of every iteration == type of data user enters
-count=0
+count=1
 for key in "${!ImportedSchema[@]}"; do
     echo "Enter ($key) value : "
     read cell
@@ -46,12 +51,25 @@ for key in "${!ImportedSchema[@]}"; do
             echo "W e i r d   I n p u t"
             ;;
         esac
-
+    
+    # if the field is primary key     
+    if [[ $count -eq $pk ]]
+    then
+    #check if primary key alreafy exist
+    flag=`awk 'BEGIN{FS=":";f=0} {if($'$pk' == "'$cell'") {f=1}} END{print f}' $table_file`
+    
+        if [[ $flag -eq 1 ]]
+        then
+        echo The field is primary key and value already exists
+        source ./TableScripts/TableMenu.sh
+        fi
+    fi
+    
     #check type equals value or not
     if [ $type=${ImportedSchema[$key]} ]; then
         correct=true
         # save every value on a separate line
-        if [[ $count == 0 ]]
+        if [[ $count == 1 ]]
         then
         TableData=$cell
         else
@@ -60,6 +78,9 @@ for key in "${!ImportedSchema[@]}"; do
     else
         correct=false
     fi
+    
+
+    
     ((count=$count+1))
 done
 

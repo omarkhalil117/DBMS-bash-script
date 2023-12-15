@@ -50,6 +50,7 @@ fi
 fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' ./DBs/$Database/schema_$TableName`
 ((fn=$fn-2))
 
+echo "fn $fn"
 
 #check if the old value exist
 flag=`awk 'BEGIN{FS=":" ; f=0} {if($'$fn' == "'$oldValue'") {f=1}} END{print f}' ./DBs/$Database/$TableName`
