@@ -1,5 +1,8 @@
 #! /usr/bin/bash
 
+export LC_COLLATE=C 
+
+
 DB=$1
 ls DBs/$DB | grep -v '^schema_' # List all files not starting with schema_ (table files only)
 
