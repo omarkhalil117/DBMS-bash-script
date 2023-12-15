@@ -6,13 +6,50 @@ echo Tables List :
 
 ls ./DBs/$ourDataBase | grep -v '^schema_'
 
-read -p "Please enter Table you want to delete : " tablename
+read -p "Please enter Table you want to delete/delete-from : " t_name
 
-if [[ -f DBs/$ourDataBase/$tablename ]]; then
-    `rm DBs/$ourDataBase/$tablename`
-    `rm DBs/$ourDataBase/schema_$tablename`
-    echo Table Deleted Successfully
-else
-    echo This table does not exist !!
-fi
+t="DBs/$ourDataBase/$t_name"
+s="DBs/$ourDataBase/schema_$t_name"
 
+deleteOptions=("Delete_Whole_Table" "Delete_From_Table")
+
+select choice in "${deleteOptions[@]}"
+
+do
+    case $choice in
+            "Delete_Whole_Table")
+
+            if [[ -f DBs/$ourDataBase/$tablename ]]; then
+                `rm DBs/$ourDataBase/$tablename`
+                `rm DBs/$ourDataBase/schema_$tablename`
+                 echo Table Deleted Successfully
+            else
+                echo This table does not exist !!
+            fi
+
+            source ./TableScripts/TableMenu.sh
+        ;;
+        "Delete_From_Table")
+
+            # print fields
+            awk 'BEGIN{FS=":"} NR > 2 {print $1}' $s
+
+            read -p "Please enter the field you want to delete its row : " f_name
+
+            #check existance of field
+            flag=`awk 'BEGIN{FS=":" ; f=0} NR>2 {if($1 == "'$f_name'") {f=1}} END{print f}' $s`
+            
+            if [[ $flag = 0 ]]; then
+                echo Wrong field name
+            fi
+
+            read -p "Please enter the field  value : " f_value
+            
+            awk -v pattern="$f_value" '$0 !~ pattern' "$t" > temp && mv temp "$t"
+        ;;
+        *)
+            echo default case
+        ;;
+        
+    esac
+done
