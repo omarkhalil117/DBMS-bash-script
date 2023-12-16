@@ -3,16 +3,19 @@
 export LC_COLLATE=C 
 shopt -s extglob
 
+#fetch DB
 Database=$1
 
 echo Tables List :
 echo =============
 
+#list Tables to choose
 ls ./DBs/$Database/ | grep -v 'schema_'
 
 #ask for Table Name
 read -p "Enter Table you want to update : " TableName
 
+#check if table doesn't exist
 if [[ ! -f ./DBs/$Database/$TableName ]]
 then
 echo Table Not found
@@ -26,10 +29,10 @@ awk 'BEGIN{FS=":"} NR > 2 {print $1}' ./DBs/$Database/schema_$TableName
 read -p "Enter Field name :  " fname
 
 #check existance of field
-flag=`awk 'BEGIN{FS=":" ; f=0} NR>2 {if($1 == "'$fname'") {f=1}} END{print f}' ./DBs/$Database/schema_$TableName`
+flag1=`awk 'BEGIN{FS=":" ; f=0} NR>2 {if($1 == "'$fname'") {f=1}} END{print f}' ./DBs/$Database/schema_$TableName`
 
 #if it doesn't exist back to main menue
-if [[ $flag = 0 ]]
+if [[ $flag1 = 0 ]]
 then
 echo Wrong field name
 source ./TableScripts/TableMenu.sh
@@ -52,13 +55,15 @@ fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' ./DBs/$Database/schema
 
 
 #check if the old value exist
-flag=`awk 'BEGIN{FS=":" ; f=0} {if($'$fn' == "'$oldValue'") {f=1}} END{print f}' ./DBs/$Database/$TableName`
+flag2=`awk 'BEGIN{FS=":" ; f=0} {if($'$fn' == "'$oldValue'") {f=1}} END{print f}' ./DBs/$Database/$TableName`
 
-if [[ $flag = 0 ]]
+#check if oldvalue doesn't exist in table
+if [[ $flag2 -eq 0 ]]
 then
 echo The old value does not exist
 source ./TableScripts/TableMenu.sh
 fi
+
 
 #check if the field is primary key
 pknum=`head -n 1 ./DBs/$Database/schema_$TableName`

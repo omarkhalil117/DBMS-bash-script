@@ -22,9 +22,11 @@ createDB() {
     
     if [ ! -d "./DBs/$dbName" ]; then
         mkdir -p "./DBs/$dbName"
+        echo DataBase created
     else
         echo This database already exists, choose another name
         createDB
+        
     fi
 }
 

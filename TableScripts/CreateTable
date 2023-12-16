@@ -15,6 +15,7 @@ if [[ -f "./DBs/$DB/$tname" || -z $tname || $tname =~ ^[0-9] ]]
     source ./TableScripts/TableMenu.sh
 fi
 
+# create Table files 
 touch "./DBs/$DB/$tname"
 touch "./DBs/$DB/schema_$tname"
 
@@ -58,18 +59,19 @@ for ((i = 0; i < $colnum; i++)); do
     else
     echo there is already a primary key
     fi
-    # Check for dtype
+    
     echo Enter Data type of column :
     
+    # check datatype of columns
     select dtype in string int; do
         case $dtype in
             string)
-                dtype=string
+                dtype="string"
                 schema+=([$fname]=$dtype) > "./DBs/$DB/schema_$tname"
                 break
             ;;
             int)
-                dtype=int
+                dtype="int"
                 schema+=([$fname]=$dtype) > "./DBs/$DB/schema_$tname"
                 break
             ;;
@@ -86,11 +88,14 @@ echo Table created successfully
 
 output_file="./DBs/$DB/schema_$tname"
 
+
+# write into table 
 echo $pkey  >> "$output_file"
 
 for key in "${!schema[@]}"; do
     echo "$key:${schema[$key]}" >> "$output_file"
 done
 
+unset schema
 
 

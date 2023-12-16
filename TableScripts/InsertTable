@@ -3,6 +3,7 @@
 export LC_COLLATE=C
 shopt -s extglob
 
+#fetch DB
 ParentDB=$1
 
 
@@ -25,6 +26,7 @@ fi
 declare -A ImportedSchema
 declare -a TableData=()
 
+#store files in variables
 schema_file="./DBs/$ParentDB/schema_$TableName"
 table_file="./DBs/$ParentDB/$TableName"
 
@@ -41,11 +43,11 @@ for key in "${!ImportedSchema[@]}"; do
     echo "Enter ($key) value : "
     read cell
         case $cell in
-        +(^[0-9]+$))     # so he cant enter 5a,6a
-               type="int"
+        +([0-9]))     
+               type=int
             ;;
         +([0-9a-zA-Z]))
-               type="string"
+               type=string
             ;;
         *)
             echo "W e i r d   I n p u t"
@@ -67,37 +69,34 @@ for key in "${!ImportedSchema[@]}"; do
     fi
     
     #check type equals value or not
-    if [ $type=${ImportedSchema[$key]} ]; then
-        correct=1
+    if  [[ $type = ${ImportedSchema[$key]} ]]; then
         # save every value on a separate line
-        if [[ $count == 1 ]]
+        if [[ $count -eq 1 ]]
         then
         TableData=$cell
         else
         TableData=$TableData:$cell
         fi
-    else
-        correct=0
+        else
+        echo Wrong Datatype
+        source ./TableScripts/TableMenu.sh
     fi
-    
-    
-    
+    #increment it so we can sperarate values with ":"
     ((count=$count+1))
 done
 
+#show the entered values
 echo "${TableData[@]}"
 
-if [[ $correct -eq 0 ]]; then
-    for data in "${TableData[@]}"; do
-        echo -n "$data " >> "./DBs/$ParentDB/$TableName"
-    done
-    echo >> "./DBs/$ParentDB/$TableName"  # append a new line
-    
-    else
-    echo Wrong inputs
-    source ./TableScripts/TableMenu.sh
-fi
 
+for data in "${TableData[@]}"; do
+    echo -n "$data" >> "./DBs/$ParentDB/$TableName"
+    done
+
+# write into table
+echo >> "./DBs/$ParentDB/$TableName"  # append a new line
+
+#free the used variables
 unset ImportedSchema
 unset TableData
 

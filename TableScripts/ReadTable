@@ -7,31 +7,36 @@ DB=$1
 echo Tables List:
 echo ============
 
-ls ./DBs/$DB/
+#list tables
+ls ./DBs/$ParentDB/ | grep -v '^schema_'
 
 read -p "Enter Table you want to read : " TableName
 
+#check if table doesn't exist
 if ! [[ -f ./DBs/$DB/$TableName  || -z $TableName ]]
 then
 echo "Wrong Table name"
 source ./TableScripts/TableMenu.sh
 fi
 
+#choose if we want to read the whole table or not
 echo Do you want to Read The whole table or select some rows ? 
 echo [1] Read whole table
 echo [2] Select 
+
 
 select choice in 1 2
 
 do
 case $choice in
 1)
+#list whole table
 cat ./DBs/$DB/$TableName
 source ./TableScripts/TableMenu.sh
 ;;
 2)
 
-#list the fields 
+#list the fields that mmets the condition
 echo choose from these fields :
 awk 'BEGIN{FS=":"} NR>2 {print $1}' ./DBs/$DB/schema_$TableName
 
@@ -93,12 +98,12 @@ fi
 
 # get field num from schema
 fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' ./DBs/$DB/schema_$TableName`
-fn=$((fn-2))
+fn=$((fn-2))  #decrement by two to get the actual field number
 
 # search for the value int the field number
 awk 'BEGIN{FS=":"} { if($'$fn' == "'$val'") print $0 }' ./DBs/$DB/$TableName
 
-
+#go back
 source ./TableScripts/TableMenu.sh
 ;;
 *)

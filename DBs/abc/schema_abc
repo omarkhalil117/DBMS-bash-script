@@ -1,0 +1,5 @@
+1
+Column:DataType
+emp:int
+age:int
+name:string
