@@ -22,7 +22,7 @@ touch "./DBs/$DB/schema_$tname"
 read -p "Enter Number of columns : " colnum
 
 #check if colnum is integer or NULL
-if ! [[ $colnum =~ ^[0-9]+$ ]]
+if ! [[ $colnum =~ ^[1-9]+$ ]]
 then 
 echo Wrong datatype or null
 rm "./DBs/$DB/$tname"
