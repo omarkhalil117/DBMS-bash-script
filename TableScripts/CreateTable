@@ -2,7 +2,7 @@
 
 export LC_COLLATE=C
 shopt -s extglob
-
+source ./TableScripts/HelperFunctions
 
 read -p "Enter Table name : " tname
 
@@ -33,7 +33,7 @@ fi
 declare -A schema=(["Column"]="DataType")  # -A means associative array
 
 # validate number of columns is number(integer) = $colnum
-flag=0
+flag=false
 for ((i = 0; i < $colnum; i++)); do
     
     # Ask for field name
@@ -49,16 +49,7 @@ for ((i = 0; i < $colnum; i++)); do
     fi
     
     # Ask if field is primary key
-    read -p "Do you want to use this column as a primary key ?? [y|Y OR n|N] " ans
-    
-    if [[ $ans = [yY] && $flag != 1 ]]
-    then
-        ((pkey=$i+1))
-        flag=1 # raise flag so we cant specify more than one pk
-        echo "$fname is set as a primary key"
-    else
-        echo there is already a primary key
-    fi
+    checkPrimaryKey
     
     echo Enter Data type of column :
     

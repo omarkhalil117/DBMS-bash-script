@@ -1,0 +1,31 @@
+deleteTableFiles() {
+    rm ./DBs/$DB/$tname
+    rm ./DBs/$DB/schema_$tname
+}
+
+checkPrimaryKey() {
+    read -p "Do you want to use this column as a primary key ?? [y|Y OR n|N] " ans
+    if [[ $ans = [yY] && $flag == false ]]; then
+            flag=true
+            echo "$fname is set as a primary key"
+            pkey=$((i+1))
+        
+        elif [[ $ans = [yY] && $flag == true ]]; then
+            deleteTableFiles
+            echo "error no more than 1 pk is allowed"
+            source ./TableScripts/CreateTable $DB
+        elif [[ $ans = [nN] ]]; then
+            echo
+    else
+        echo "bad input only (Y) or (y) or (N) or (n)"
+        checkPrimaryKey
+    fi
+    
+    if [[ $i -eq $(($colnum-1)) && $flag == false ]]; then
+        deleteTableFiles
+        echo Fatal Error you didn\'t set the pk yet!
+        echo exiting
+        source ./TableScripts/CreateTable $DB
+    fi
+}
+
