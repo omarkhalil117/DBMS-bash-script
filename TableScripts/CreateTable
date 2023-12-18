@@ -1,6 +1,6 @@
 #! /bin/bash
 
-export LC_COLLATE=C 
+export LC_COLLATE=C
 shopt -s extglob
 
 
@@ -9,25 +9,25 @@ read -p "Enter Table name : " tname
 DB=$1
 
 # Validation for file existance
-if [[ -f "./DBs/$DB/$tname" || -z $tname || $tname =~ ^[0-9] ]]
-    then
+if [[ -f "./DBs/$DB/$tname" || -z $tname || $tname =~ ^[0-9] || $tname =~ [[:space:]] ]]
+then
     echo Table already exists or empty value or starts with number
     source ./TableScripts/TableMenu.sh
 fi
 
-# create Table files 
+# create Table files
 touch "./DBs/$DB/$tname"
 touch "./DBs/$DB/schema_$tname"
 
 read -p "Enter Number of columns : " colnum
 
-#check if colnum is integer or NULL
+#check if colnum is not an integer or NULL
 if ! [[ $colnum =~ ^[1-9]+$ ]]
-then 
-echo Wrong datatype or null
-rm "./DBs/$DB/$tname"
-rm "./DBs/$DB/schema_$tname"
-source ./TableScripts/TableMenu.sh
+then
+    echo Wrong datatype or null
+    rm "./DBs/$DB/$tname"
+    rm "./DBs/$DB/schema_$tname"
+    source ./TableScripts/TableMenu.sh
 fi
 
 declare -A schema=(["Column"]="DataType")  # -A means associative array
@@ -42,7 +42,7 @@ for ((i = 0; i < $colnum; i++)); do
     #check if field name is string if not then decrement i
     
     if [[ $fname != +([a-zA-Z]) ]]
-     then
+    then
         echo field name is not valid Try again
         ((i=$i-1))
         continue
@@ -57,7 +57,7 @@ for ((i = 0; i < $colnum; i++)); do
         flag=1 # raise flag so we cant specify more than one pk
         echo "$fname is set as a primary key"
     else
-    echo there is already a primary key
+        echo there is already a primary key
     fi
     
     echo Enter Data type of column :
@@ -78,8 +78,8 @@ for ((i = 0; i < $colnum; i++)); do
             *)
                 echo Wrong input
             ;;
-        esac        
-
+        esac
+        
     done
     
 done
@@ -89,7 +89,7 @@ echo Table created successfully
 output_file="./DBs/$DB/schema_$tname"
 
 
-# write into table 
+# write into table
 echo $pkey  >> "$output_file"
 
 for key in "${!schema[@]}"; do
