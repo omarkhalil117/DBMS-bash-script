@@ -1,22 +1,30 @@
 #! /usr/bin/bash
 
+deleteTableFiles() {
+    rm ./DBs/$AssocDB/$tname
+    rm ./DBs/$AssocDB/schema_$tname
+}
+
 checkPrimaryKey() {
     if [[ $ans = [yY] && $flag == false ]]; then
-        flag=true
-        echo "$fname is set as a primary key"
-        PrimaryKey=$((i+1))
+            flag=true
+            echo "$fname is set as a primary key"
+            PrimaryKey=$((i+1))
         
         elif [[ $ans = [yY] && $flag == true ]]; then
-        echo "error no more than 1 pk is allowed"
-        source ./TableScripts/CreateTable $AssocDB
+            deleteTableFiles
+            echo "error no more than 1 pk is allowed"
+            source ./TableScripts/CreateTable $AssocDB
         elif [[ $ans = [nN] ]]; then
-        echo
+            echo
     else
+        deleteTableFiles
         echo bad input
         source ./TableScripts/CreateTable $AssocDB
     fi
     
     if [[ $i -eq $(($colnum-1)) && $flag == false ]]; then
+        deleteTableFiles
         echo Fatal Error you didn\'t set the pk yet!
         echo exiting
         source ./TableScripts/CreateTable $AssocDB
