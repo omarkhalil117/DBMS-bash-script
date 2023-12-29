@@ -1,20 +1,81 @@
 #! /bin/bash
+export LC_COLLATE=C 
+shopt -s extglob
 
-# list files
+ourDataBase=$1
+
 echo Tables List :
 
-ls Testdir/ 
+# show tables list
+ls ./DBs/$ourDataBase | grep -v '^schema_'
 
-read -p "Please enter Table you want to delete" tablename 
+#get Table name
+read -p "Please enter Table you want to delete/delete-from : " t_name
 
-if [[ -f Testdir/$tablename ]]
+#store table / schema path
+t="./DBs/$ourDataBase/$t_name"
+s="./DBs/$ourDataBase/schema_$t_name"
 
+#check if they are null
+if ! [[ -f $t  || -z $t ]]
 then
-`rm Testdir/$tablename`
-echo Table Deleted Successfully
-
-else
-echo Table does not exist !!
+    echo "Wrong Table name"
+    source ./TableScripts/TableMenu.sh
 fi
 
 
+
+
+deleteOptions=("Delete_Whole_Table" "Delete_From_Table" "Truncate_The_Table")
+
+#choose what to delete 
+select choice in "${deleteOptions[@]}"
+
+do
+    case $choice in
+        "Delete_Whole_Table")
+            #check if table exists 
+            if [[ -f $t ]]; then
+                 rm $t
+                 rm $s
+                 echo Table Deleted Successfully
+            else
+                echo This table does not exist !!
+            fi
+            #go back
+            source ./TableScripts/TableMenu.sh
+        ;;
+        "Delete_From_Table")
+
+            #print fields
+            awk 'BEGIN{FS=":"} NR > 2 {print $1}' $s
+            
+            #get field name
+            read -p "Please enter the field you want to delete its row : " f_name
+
+            #check existance of field
+            flag=`awk 'BEGIN{FS=":" ; f=0} NR>2 {if($1 == "'$f_name'") {f=1}} END{print f}' $s`
+            
+            # if field doesn't exist go back
+            if [[ $flag = 0 ]]; then
+                echo Wrong field name
+                source ./TableScripts/TableMenu.sh
+            fi
+
+            read -p "Please enter the field  value : " f_value
+            # select lines that do not match the pattern & store in another tmp file to be overrided in the same file.
+            awk -v pattern="$f_value" '$0 !~ pattern' "$t" > temp && mv temp "$t"
+            echo Deleted Successfuly
+            source ./TableScripts/TableMenu.sh
+        ;;
+        "Truncate_The_Table")
+            #delete table content
+            cat /dev/null > $t
+            echo Table truncated successfully        
+        ;;
+        *)
+            echo Wrong Input
+        ;;
+        
+    esac
+done

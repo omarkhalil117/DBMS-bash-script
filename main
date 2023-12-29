@@ -1,0 +1,51 @@
+#! /usr/bin/bash
+
+echo Welcome To Bash-Base DBMS Project 🗃️
+
+PS3="Choose a number (n) 0/10 => Menu : "
+
+options=("Create DB" "List DBs" "Drop DB" "Rename DB" "Connect to DB" "Exit" "0")
+
+source ./functions
+
+echo "Select an option:"
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Create DB")
+            createDB
+        ;;
+        
+        "List DBs")
+            listDBs
+        ;;
+        
+        "Drop DB")
+            dropDB
+        ;;
+        
+        "Rename DB")
+            renameDB
+        ;;
+        
+        "Connect to DB")
+            connectDB
+        ;;
+        
+        "0")
+            if [[ -z $1 ]];then     # means = null
+                source ./main
+            else
+                source ./TableScripts/TableMenu.sh
+            fi 
+        ;;
+
+        "Exit")
+            echo "Exiting...🚪"
+            exit
+        ;;
+        *)
+            echo "Invalid option, only choose allowable index number"
+        ;;
+    esac
+done
