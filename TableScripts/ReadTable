@@ -1,15 +1,122 @@
 #! /bin/bash
+export LC_COLLATE=C
+shopt -s extglob
 
-ls Testdir/
+READDB=$1
 
-read -p "Enter Table you want to read" TableName
+echo Tables List:
+echo ============
 
-if [[ -f Testdir/$TableName ]]
+#list tables
+ls ./DBs/$READDB/ | grep -v '^schema_'
 
+read -p "Enter Table you want to read : " TableName
+
+#check if table doesn't exist
+if ! [[ -f ./DBs/$READDB/$TableName  || -z $TableName ]]
 then
-echo `cat Testdir/$TableName`
-
-else
-echo "Wrong Table name"
-
+    echo "Wrong Table name"
+    source ./TableScripts/TableMenu.sh
 fi
+
+#choose if we want to read the whole table or not
+echo Do you want to Read The whole table or select some rows ?
+echo [1] Read whole table
+echo [2] Select
+
+
+select choice in 1 2
+
+do
+    case $choice in
+        1)
+            #list whole table
+            cat ./DBs/$READDB/$TableName
+            source ./TableScripts/TableMenu.sh
+        ;;
+        2)
+            
+            #list the fields that mmets the condition
+            echo choose from these fields :
+            awk 'BEGIN{FS=":"} NR>2 {print $1}' ./DBs/$READDB/schema_$TableName
+            
+            read -p "Enter field you want to search for : " fname
+            read -p "Enter field value : " val
+            
+            
+            #check if the inputs are null
+            
+            if [[ -z $fname || -z $val ]]
+            then
+                echo Error NULL input
+                source ./TableScripts/TableMenu.sh
+            fi
+            
+            #check if fname doesn't exist
+            flag=`awk 'BEGIN {FS=":" ; f=0} {if($1=="'$fname'"){f=1}} END{print f}' ./DBs/$READDB/schema_$TableName`
+            
+            if [[ $flag -eq 0 ]]
+            then
+                echo Wrong field name
+                source ./TableScripts/TableMenu.sh
+            fi
+            
+            #check for datatype of value
+            
+            datatype=`awk 'BEGIN{FS=":"} {if($1=="'$fname'"){print$2}}' ./DBs/$READDB/schema_$TableName`
+            
+            
+            #if datatype is string
+            if [[ $datatype = "string" ]]
+            then
+                if [[ $val =~ [a-zA-z] ]]
+                then
+                    echo   #dummy event
+                else
+                    echo "Wrong data type in old value"
+                    source ./TableScripts/TableMenu.sh
+                fi
+                
+            fi
+            
+            
+            #if datatype is int
+            if [[ $datatype = "int" ]]
+            then
+                if [[ $val =~ [1-9] ]]
+                then
+                    echo   #dummy event
+                else
+                    echo "Wrong data type in old value"
+                    source ./TableScripts/TableMenu.sh
+                fi
+                
+            fi
+            
+            
+            
+            
+            # get field num from schema
+            fn=`awk 'BEGIN{FS=":"} {if ($1 == "'$fname'") print NR }' ./DBs/$READDB/schema_$TableName`
+            fn=$((fn-2))  #decrement by two to get the actual field number
+            
+            # search for the value int the field number
+            awk 'BEGIN{FS=":"} { if($'$fn' == "'$val'") print $0 }' ./DBs/$READDB/$TableName
+            
+            #go back
+            source ./TableScripts/TableMenu.sh
+        ;;
+        *)
+            echo Wrong input
+        ;;
+        
+    esac
+done
+
+
+
+
+
+
+
+

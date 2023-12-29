@@ -1,18 +1,20 @@
-#! /bin/bash
-ls Testdir/
+#! /usr/bin/bash
 
-read -p "Enter the Table you want to rename " oldname
-
+export LC_COLLATE=C 
 
 
-if [[ -f Testdir/$oldname ]]
+RDB=$1
+ls DBs/$RDB | grep -v '^schema_' # List all files not starting with schema_ (table files only)
 
-then
-read -p "Enter new name " newname
-mv Testdir/$oldname Testdir/$newname
-echo Table renamed successfully !!
+read -p "Enter the Table you want to rename : " oldname
 
+if [[ -f DBs/$RDB/$oldname ]]; then
+    read -p "Enter new name : " NewName
+    mv DBs/$RDB/schema_$oldname DBs/$RDB/schema_$NewName
+    mv DBs/$RDB/$oldname DBs/$RDB/$NewName
+    echo Table renamed successfully with !!
+    
 else
-echo Wrong table name
-
+    echo Wrong table name
+    source ./TableScripts/TableMenu.sh 
 fi

@@ -1,79 +1,88 @@
 #! /bin/bash
 
-read -p "Enter filename" tname
+export LC_COLLATE=C
+shopt -s extglob
+source ./TableScripts/HelperFunctions
+
+read -p "Enter Table name : " tname
+
+DB=$1
 
 # Validation for file existance
-if [[ -f Testdir/$tname  ]]
+if [[ -f "./DBs/$DB/$tname" || -z $tname || $tname =~ ^[0-9] || $tname =~ [[:space:]] ]]
 then
-echo File already exists
-./TableMenue.sh
-
+    echo Table already exists or empty value or starts with number
+    source ./TableScripts/TableMenu.sh
 fi
 
-read -p "Enter Number of columns " colnum
+# create Table files
+touch "./DBs/$DB/$tname"
+touch "./DBs/$DB/schema_$tname"
 
-for ((i=0 ; i<$colnum ; i++))
-do
+read -p "Enter Number of columns : " colnum
 
-# Ask for field name
-read -p "Enter field name" fname
-
-#check if field name is string if not then decrement i
-
-if [[ $fname != +([a-zA-Z]) ]]
-
-then 
-echo field name not valid
-((i=$i-1))
-fi
-
-# Ask if field is primary key
-read -p "Do you want to use this column as primary key ?? [y,n] " ans
-
-if [[ $ans = [yY] && $flag != 1 ]]
-
+#check if colnum is not an integer or NULL
+if ! [[ $colnum =~ ^[1-9]+$ ]]
 then
-pkey=true
-flag=1  # raise flag so we cant specify more than one pk
-
-else
-echo There is existing pkey :D
-pkey=false
+    echo Wrong datatype or null
+    rm "./DBs/$DB/$tname"
+    rm "./DBs/$DB/schema_$tname"
+    source ./TableScripts/TableMenu.sh
 fi
 
+declare -A schema=(["Column"]="DataType")  # -A means associative array
 
-# Check for dtype
-echo Enter Data type of field
+# validate number of columns is number(integer) = $colnum
+flag=false
+for ((i = 0; i < $colnum; i++)); do
+    
+    # Ask for field name
+    read -p "Enter column name : " fname
+    
+    #check if field name is string if not then decrement i
+    
+    if [[ $fname != +([a-zA-Z]) ]]
+    then
+        echo field name is not valid Try again
+        ((i=$i-1))
+        continue
+    fi
+    
+    # Ask if field is primary key
+    checkPrimaryKey
+    
+    echo Enter Data type of column :
+    
+    
 
-select dtype in string int
-do
-case $dtype in
-string)
-dtype=string
-break
-;;
-int)
-dtype=int
-break
-;;
-*)
-echo Wrong input
-;;
-esac
-
-schema[$i]=$fname,$dtype,$pkey
+    # check datatype of columns
+   select dtype in string int; do
+        case $dtype in
+            string)
+                dtype="string"
+                schema+=([$fname]=$dtype)
+                break
+            ;;
+            int)
+                dtype="int"
+                schema+=([$fname]=$dtype)
+                break
+            ;;
+            *)
+                echo Wrong input
+            ;;
+        esac
+    done
+    
 done
-# Create Table file 
-
-
-done
-
-touch "Testdir/$tname"
-touch "Testdir/schema_$tname"
-
 
 echo Table created successfully
 
+output_file="./DBs/$DB/schema_$tname"
 
+# write into table
+echo $pkey  >> "$output_file"
 
-
+for key in "${!schema[@]}"; do
+    echo "$key:${schema[$key]}" >> "$output_file"
+done
